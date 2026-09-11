@@ -327,6 +327,17 @@ noncomputable def rootCount (L : IntermediateField K (SeparableClosure K)) {n : 
 
 variable (K)
 
+/-- **Almost-everywhere measurability of the root count on the Eisenstein region.** Layer 1
+makes the root count locally constant on the separable Eisenstein locus, whose complement in the
+region is null. This supplies the summand hypothesis for `MeasureTheory.lintegral_tsum`. -/
+theorem aemeasurable_rootCount (n : ℕ) (hn : 0 < n)
+    [MeasurableSpace (Fin n → K)] [BorelSpace (Fin n → K)]
+    (μ : MeasureTheory.Measure (Fin n → K)) [μ.IsAddHaarMeasure]
+    (L : IntermediateField K (SeparableClosure K)) (hL : L ∈ totallyRamifiedOfDegree K n) :
+    AEMeasurable (fun a : Fin n → K => (rootCount L a : ℝ≥0∞))
+      (μ.restrict (eisensteinSet K n)) :=
+  sorry
+
 /-- Almost everywhere on the Eisenstein region, the root counts over
 `totallyRamifiedOfDegree K n` sum to `n`: an Eisenstein polynomial is irreducible, and each of its
 `n` roots generates exactly one member. -/
@@ -335,6 +346,15 @@ theorem tsum_rootCount (n : ℕ) (hn : 0 < n)
     (μ : MeasureTheory.Measure (Fin n → K)) [μ.IsAddHaarMeasure] (hμ : μ (integerBox K n) = 1) :
     ∀ᵐ a ∂μ.restrict (eisensteinSet K n),
       ∑' L : totallyRamifiedOfDegree K n, (rootCount L.1 a : ℝ≥0∞) = n :=
+  sorry
+
+/-- **Countability of the family.** Local constancy at an Eisenstein generator gives each member
+a positive root-count integral. The almost-everywhere root-count identity bounds the sum of these
+integrals over every finite subfamily by `n * μ (eisensteinSet K n)`, a finite value. Thus only
+countably many members occur. This supplies the countable index type for
+`MeasureTheory.lintegral_tsum` without using the mass formula. -/
+theorem countable_totallyRamifiedOfDegree (n : ℕ) (hn : 0 < n) :
+    (totallyRamifiedOfDegree K n).Countable :=
   sorry
 
 /-- **The integral of the root count** ([Serre 1978, Lemmas 2 and 3, eqs. (5)–(13)]): the change of

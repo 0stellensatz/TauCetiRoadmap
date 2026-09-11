@@ -267,6 +267,16 @@ the same reason.
   full-measure separable locus all multiplicities are `1`. Almost everywhere on `E_n`,
   `∑_{L ∈ σ_K n} rootCount L a = n`: an Eisenstein polynomial is irreducible, and each of its `n`
   roots generates exactly one member of `σ_K n`.
+- **Almost-everywhere measurability of the root count.** For each `L ∈ σ_K n`, state
+  `AEMeasurable (fun a => (rootCount L a : ℝ≥0∞)) (μ.restrict (eisensteinSet K n))`.
+  Layer 1 makes the root count locally constant on the separable Eisenstein locus; the
+  non-separable locus is null, giving measurability for the restricted measure.
+- **Countability of the family.** For `0 < n`, state
+  `(totallyRamifiedOfDegree K n).Countable`. At the coefficient vector of an Eisenstein generator
+  of each `L`, local constancy gives an open piece of `E_n` of positive Haar measure on which
+  `rootCount L` is positive. For any finite subfamily, the sum of the root-count integrals is at
+  most `n · μ(E_n)`, by the almost-everywhere root-count identity. This finite bound forces the
+  family of positive integrals, hence `σ_K n`, to be countable, without using Theorem 1.
 - **The local fibre count** ([Serre 1978, Lemma 1]): the cube of radius `π^ρ` around an Eisenstein
   generator `ξ` contains exactly one root of each nearby Eisenstein polynomial — Layer 1 applied
   on the region.
@@ -280,8 +290,9 @@ the same reason.
 ### Layer 4: the mass formulas
 
 - **Theorem 1** ([Serre 1978, Thm. 1]): for `0 < n`, `∑' L : σ_K n, 1 / (q K) ^ c L = n` in
-  `ℝ≥0∞`. Integrate the root-count identity of Layer 3 over `E_n` and divide by the measure of the
-  region.
+  `ℝ≥0∞`. Integrate the root-count identity of Layer 3 over `E_n`, interchange the sum and
+  integral using `MeasureTheory.lintegral_tsum` with Layer 3's countability and
+  almost-everywhere measurability targets, and divide by the measure of the region.
 - **The finiteness dichotomy** ([Serre 1978, Rmk. 1°]): `σ_K n` is infinite if and only if `K` has
   equal characteristic `p` and `p ∣ n`. Both directions are targets. The forward direction follows
   from Theorem 1 together with the uniform bound `c L ≤ n · addVal(n)` outside the asserted case;
