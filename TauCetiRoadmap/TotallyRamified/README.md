@@ -3,9 +3,9 @@
 The [local fields and ramification roadmap](../LocalFieldsRamification/README.md) builds the
 arithmetic of a finite extension of a non-archimedean local field: total ramification, Eisenstein
 generators, monogenicity, the different and the discriminant, and the tame criterion. This
-roadmap is that theory's first counting consumer. It asks how *many* such extensions there are,
-and proves the answer — the **mass formula** of [Serre 1978]: inside a fixed separable closure,
-the totally ramified extensions of degree `n` of a local field `K` satisfy
+roadmap is that theory's counting consumer. It asks how *many* such extensions there are, and
+proves the answer — the **mass formula** of [Serre 1978]: inside a fixed separable closure, the
+totally ramified extensions of degree `n` of a local field `K` satisfy
 
 ```text
 ∑_{L ∈ σ_K(n)} q^{-c(L)} = n,          c(L) = d(L) − n + 1
