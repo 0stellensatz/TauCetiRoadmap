@@ -59,7 +59,7 @@ beside Mathlib's `AddSubgroup.index_eq_natAbs_det`). Everything else, including 
 open ValuativeRel
 open scoped ENNReal
 
-namespace TauCetiRoadmap.TotallyRamified
+namespace TauCetiRoadmap.MassFormula
 
 variable (K : Type*) [Field K] [ValuativeRel K] [UniformSpace K] [IsUniformAddGroup K]
   [IsNonarchimedeanLocalField K]
@@ -486,4 +486,4 @@ theorem ncard_totallyRamifiedOfDegree_of_not_dvd (n : ℕ) (hn : 0 < n)
     (hp : ¬ ringChar 𝓀[K] ∣ n) : (totallyRamifiedOfDegree K n).ncard = n :=
   sorry
 
-end TauCetiRoadmap.TotallyRamified
+end TauCetiRoadmap.MassFormula
