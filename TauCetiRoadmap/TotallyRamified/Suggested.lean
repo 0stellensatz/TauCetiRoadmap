@@ -14,10 +14,12 @@ plan Layers 0–4, the worked examples, and the references) is in `README.md`. M
 field itself — `IsNonarchimedeanLocalField` (`Mathlib/NumberTheory/LocalField/Basic.lean`), with
 `𝒪[K]` a complete discrete valuation ring, `𝓀[K]` finite, and `IsAdicComplete 𝓂[K] 𝒪[K]` all
 available by `inferInstance` — together with Eisenstein polynomials, `Algebra.discr`,
-`differentIdeal`, `Ideal.ramificationIdx'`, `HenselianLocalRing`, and Haar measure on a locally
-compact group. It has **no** quantitative Newton estimate (only qualitative Hensel), **no**
-non-archimedean analogue of `Measure.addHaar_image_linearMap`, and — the ultimate target — **no**
-mass formula counting the totally ramified extensions of given degree ([Serre 1978]).
+`differentIdeal`, `Ideal.ramificationIdx'`, `HenselianLocalRing`, the quantitative Hensel
+`hensels_lemma` over `ℤ_[p]` (`Mathlib/NumberTheory/Padics/Hensel.lean`), and Haar measure on a
+locally compact group. It has **no** quantitative Newton estimate over a general complete discrete
+valuation ring, **no** non-archimedean analogue of `Measure.addHaar_image_linearMap`, and — the
+ultimate target — **no** mass formula counting the totally ramified extensions of given degree
+([Serre 1978]).
 
 ⚠ **The ramification-theoretic substrate is consumed, not built here.** Total ramification,
 Eisenstein generators, monogenicity, the different and the discriminant, the exponent `d`, and
@@ -34,8 +36,8 @@ junk-tolerant wrappers below install those adapters and reduce to those declarat
 comparison theorems, as that roadmap's consumer contract prescribes; no ramification-theoretic
 notion is defined independently here.
 
-This file pins the roadmap's load-bearing **definitions** (`residueCard`, the consumed-substrate
-wrappers `intermediateFieldIsTotallyRamified` and `intermediateFieldDiscriminantExponent`,
+This file pins the roadmap's load-bearing **definitions** (the consumed-substrate wrappers
+`intermediateFieldIsTotallyRamified` and `intermediateFieldDiscriminantExponent`,
 `totallyRamifiedOfDegree`, `wildExponent`, `IsRepresentativeSet`, and the coefficient-space
 objects `toPoly`, `eisensteinSet`, `integerBox`) and its **named milestones** as `sorry`-targets
 (`sorry` is allowed in this human-owned roadmap library — these are goals, not proofs).
@@ -45,11 +47,12 @@ they take junk values. That is why every milestone carries `0 < n` and membershi
 `totallyRamifiedOfDegree K n`. Do not repair the junk by adding finiteness hypotheses to the
 definitions.
 
-Two statements are made over an arbitrary complete discrete valuation ring rather than over a
-local field, because that is the generality their proofs have: `exists_isRoot` (Layer 1,
-`TauCeti/RingTheory/DiscreteValuationRing/`) and `card_quotient_range` (Layer 2,
-`TauCeti/MeasureTheory/Group/`). Everything else, including Layer 1's `card_aroots_eq`, which
-quantifies over Layer 0's `totallyRamifiedOfDegree K n`, belongs in
+Three statements are made over an arbitrary discrete valuation ring rather than over a local
+field, because that is the generality their proofs have: `exists_isRoot` and
+`eq_of_isRoot_of_addVal_lt` (Layer 1, `TauCeti/RingTheory/DiscreteValuationRing/`; only the former
+needs completeness) and `card_quotient_range` (Layer 2, `TauCeti/LinearAlgebra/FreeModule/`,
+beside Mathlib's `AddSubgroup.index_eq_natAbs_det`). Everything else, including Layer 1's
+`card_aroots_eq`, which quantifies over Layer 0's `totallyRamifiedOfDegree K n`, belongs in
 `TauCeti/NumberTheory/LocalField/MassFormula/`.
 -/
 
@@ -68,12 +71,8 @@ discriminant exponent are `LocalFieldsRamification.IsTotallyRamified` and
 `LocalFieldsRamification.discriminantExponent`. The wrappers
 `intermediateFieldIsTotallyRamified` and `intermediateFieldDiscriminantExponent` totalize them
 over arbitrary subextensions by installing the consumed `finiteIntermediateField*` adapters, and
-each carries the comparison theorem the consumer contract requires. `residueCard`,
-`totallyRamifiedOfDegree`, `wildExponent` and `IsRepresentativeSet` are this roadmap's own. -/
-
-/-- The residue cardinality of a non-archimedean local field — Serre's `q`. -/
-noncomputable def residueCard : ℕ :=
-  Nat.card 𝓀[K]
+each carries the comparison theorem the consumer contract requires. `totallyRamifiedOfDegree`,
+`wildExponent` and `IsRepresentativeSet` are this roadmap's own. -/
 
 variable {K}
 
@@ -100,8 +99,7 @@ def intermediateFieldIsTotallyRamified (L : IntermediateField K (SeparableClosur
 
 omit [IsUniformAddGroup K] in
 /-- The comparison theorem the consumer contract requires: on a finite subextension the wrapper
-is exactly the consumed predicate at the consumed adapter structures. A closed proof, so the
-contract is type-checked rather than promised. -/
+is exactly the consumed predicate at the consumed adapter structures. -/
 theorem intermediateFieldIsTotallyRamified_iff (L : IntermediateField K (SeparableClosure K))
     [hfin : Module.Finite K ↥L] :
     intermediateFieldIsTotallyRamified L ↔
@@ -153,8 +151,7 @@ noncomputable def intermediateFieldDiscriminantExponent
 
 omit [IsUniformAddGroup K] in
 /-- The comparison theorem the consumer contract requires: on a finite subextension the wrapper
-is exactly the consumed exponent at the consumed adapter structures. A closed proof, so the
-contract is type-checked rather than promised. -/
+is exactly the consumed exponent at the consumed adapter structures. -/
 theorem intermediateFieldDiscriminantExponent_eq (L : IntermediateField K (SeparableClosure K))
     [hfin : Module.Finite K ↥L] :
     intermediateFieldDiscriminantExponent L =
@@ -199,8 +196,7 @@ transported into `IntermediateField K (SeparableClosure K)` and packaged with th
 the form every later layer applies. -/
 theorem exists_eisenstein_generator (n : ℕ) (hn : 0 < n)
     (L : IntermediateField K (SeparableClosure K)) (hL : L ∈ totallyRamifiedOfDegree K n) :
-    ∃ (x : SeparableClosure K) (π : ↥𝒪[K]), Irreducible π ∧ IsIntegral 𝒪[K] x ∧
-      (minpoly 𝒪[K] x).IsEisensteinAt (Submodule.span 𝒪[K] {π}) ∧
+    ∃ x : SeparableClosure K, IsIntegral 𝒪[K] x ∧ (minpoly 𝒪[K] x).IsEisensteinAt 𝓂[K] ∧
       IntermediateField.adjoin K {x} = L ∧ (minpoly 𝒪[K] x).natDegree = n :=
   sorry
 
@@ -260,17 +256,46 @@ the relative norm of Mathlib's `differentIdeal` — is the consumed `localDiscri
 ramification* roadmap, which owns the different and the discriminant alike; it is not a target
 here. -/
 
+/-- **The box corollary of the power-basis orthogonality**, the workhorse of Layers 2 and 3: at an
+Eisenstein generator `ξ` of a finite subextension, the ball `addVal ≥ r` of its ring of integers
+is, in power-basis coordinates, the box whose `i`-th factor is `𝓂[K] ^ ((r − i) ⌈/⌉ n)`, with
+`⌈/⌉` the `ℕ`-truncated ceiling division, so the factor is all of `𝒪[K]` when `r ≤ i`; at
+`r = n · ρ` every factor is `𝓂[K] ^ ρ`, the cube. This is the consumed
+`addVal_sum_eisenstein_powerBasis` read as a membership statement, at the consumed adapter
+structures. -/
+theorem le_addVal_sum_eisenstein_powerBasis_iff (L : IntermediateField K (SeparableClosure K))
+    [Module.Finite K ↥L] :
+    letI : ValuativeRel ↥L :=
+      LocalFieldsRamification.finiteIntermediateFieldValuativeRel K (SeparableClosure K) L
+    letI : TopologicalSpace ↥L :=
+      LocalFieldsRamification.finiteIntermediateFieldTopology K (SeparableClosure K) L
+    haveI : IsNonarchimedeanLocalField ↥L :=
+      LocalFieldsRamification.finiteIntermediateField_isNonarchimedeanLocalField K
+        (SeparableClosure K) L
+    haveI : ValuativeExtension K ↥L :=
+      LocalFieldsRamification.finiteIntermediateField_valuativeExtension K (SeparableClosure K) L
+    ∀ (f : Polynomial ↥𝒪[K]), f.IsEisensteinAt 𝓂[K] → ∀ ξ : ↥𝒪[↥L],
+      (f.map (algebraMap ↥𝒪[K] ↥𝒪[↥L])).IsRoot ξ → Algebra.adjoin ↥𝒪[K] {ξ} = ⊤ →
+      ∀ (c : Fin f.natDegree → ↥𝒪[K]) (r : ℕ),
+        (r : ℕ∞) ≤ IsDiscreteValuationRing.addVal ↥𝒪[↥L]
+            (∑ i, algebraMap ↥𝒪[K] ↥𝒪[↥L] (c i) * ξ ^ (i : ℕ)) ↔
+          ∀ i : Fin f.natDegree, c i ∈ 𝓂[K] ^ ((r - (i : ℕ)) ⌈/⌉ f.natDegree) :=
+  sorry
+
 /-! ## Layer 1: quantitative Newton lifting over a complete discrete valuation ring
 
 The Newton estimate `exists_isRoot` is stated for an arbitrary complete discrete valuation ring;
-the local-field case is an instance. It strictly refines Mathlib's `HenselianLocalRing`, which
-lifts a simple root modulo the maximal ideal and gives no distance bound. The root-count statement
+the local-field case is an instance. It is Mathlib's `hensels_lemma`
+(`Mathlib/NumberTheory/Padics/Hensel.lean`), stated there over `ℤ_[p]` in norm spelling, over an
+arbitrary complete discrete valuation ring in `addVal` spelling; `HenselianLocalRing` lifts a
+simple root modulo the maximal ideal and gives no distance bound. The root-count statement
 `card_aroots_eq` is over the local field `K` and quantifies over Layer 0's
 `totallyRamifiedOfDegree K n`. -/
 
 /-- **Newton iteration with an estimate.** If the order of `F` at `y₀` exceeds twice that of its
 derivative, the iteration converges to a root `z` whose distance to `y₀` has order at least the
-difference. Uniqueness of the root in that ball is a companion target. -/
+difference. This is Mathlib's `hensels_lemma` over a complete discrete valuation ring in `addVal`
+spelling; uniqueness of the root in that ball is `eq_of_isRoot_of_addVal_lt`. -/
 theorem exists_isRoot {A : Type*} [CommRing A] [IsDomain A] [IsDiscreteValuationRing A]
     [IsAdicComplete (IsLocalRing.maximalIdeal A) A] (F : Polynomial A) (y₀ : A)
     (hlt : IsDiscreteValuationRing.addVal A (Polynomial.eval y₀ (Polynomial.derivative F)) +
@@ -280,6 +305,19 @@ theorem exists_isRoot {A : Type*} [CommRing A] [IsDomain A] [IsDiscreteValuation
       IsDiscreteValuationRing.addVal A (Polynomial.eval y₀ F) ≤
         IsDiscreteValuationRing.addVal A (Polynomial.eval y₀ (Polynomial.derivative F)) +
           IsDiscreteValuationRing.addVal A (z - y₀) :=
+  sorry
+
+/-- **Uniqueness of the lifted root**, the form the local fibre count of Layer 3 applies: a root
+`z'` of `F` closer to a root `z` than the order of `F'` at `z` is `z`; equivalently, distinct roots
+`z ≠ z'` satisfy `addVal (z − z') ≤ addVal (F' z)`. This is the Taylor expansion of `F` at `z` and
+uses no completeness; it is the uniqueness clause of Mathlib's `hensels_lemma` in `addVal`
+spelling, and with `exists_isRoot` it makes `z` the unique root in the ball of that theorem. -/
+theorem eq_of_isRoot_of_addVal_lt {A : Type*} [CommRing A] [IsDomain A]
+    [IsDiscreteValuationRing A] (F : Polynomial A) {z z' : A} (hz : F.IsRoot z)
+    (hz' : F.IsRoot z')
+    (hlt : IsDiscreteValuationRing.addVal A (Polynomial.eval z (Polynomial.derivative F)) <
+      IsDiscreteValuationRing.addVal A (z' - z)) :
+    z' = z :=
   sorry
 
 /-- **Local constancy of the root count**, the form Layer 3 consumes: for a monic `f` over `𝒪[K]`,
@@ -296,16 +334,19 @@ theorem card_aroots_eq (n : ℕ) (hn : 0 < n) {f : Polynomial ↥𝒪[K]} (hfm :
 
 /-! ## Layer 2: the lattice index and the Haar scaling law
 
-Also stated over an arbitrary complete discrete valuation ring, with finite residue field. -/
+The index is stated over an arbitrary discrete valuation ring with finite residue field; it uses
+no completeness. The scaling law is over `K`. -/
 
 /-- **The index of an image lattice.** For an integral matrix whose determinant is associated to
 `π ^ k`, the integer box modulo its image has exactly `q ^ k` elements — Smith normal form over the
 principal ideal ring `A`. This is the arithmetic half of the scaling law; the measure-theoretic
-half (`μ (M · S) = q ^ (−k) · μ S` for the box and for balls, the non-archimedean analogue of
-`Measure.addHaar_image_linearMap`) is the other Layer-2 target. -/
+half (`μ (M '' S) = q ^ (−k) · μ S` for every measurable `S`, the non-archimedean analogue of
+`Measure.addHaar_image_linearMap`) is the other Layer-2 target. Mathlib's
+`AddSubgroup.index_eq_natAbs_det` (`Mathlib/LinearAlgebra/FreeModule/Finite/CardQuotient.lean`)
+is the `ℤ` analogue. -/
 theorem card_quotient_range {A : Type*} [CommRing A] [IsDomain A] [IsDiscreteValuationRing A]
     [Finite (IsLocalRing.ResidueField A)] {n : ℕ} (M : Matrix (Fin n) (Fin n) A)
-    (hdet : M.det ≠ 0) {π : A} (hπ : Irreducible π) {k : ℕ} (hk : Associated M.det (π ^ k)) :
+    {π : A} (hπ : Irreducible π) {k : ℕ} (hk : Associated M.det (π ^ k)) :
     Nat.card ((Fin n → A) ⧸ LinearMap.range (Matrix.mulVecLin M)) =
       Nat.card (IsLocalRing.ResidueField A) ^ k :=
   sorry
@@ -325,6 +366,14 @@ def eisensteinSet (n : ℕ) : Set (Fin n → K) :=
   {a | (∀ i, valuation K (a i) < 1) ∧
     ∀ y : K, valuation K y < 1 → valuation K y ≤ valuation K ((toPoly K a).coeff 0)}
 
+/-- **The Eisenstein region is the Eisenstein polynomials**, the bridge Layer 3 runs on: `a` lies
+in `eisensteinSet K n` exactly when its coefficients are integral and the polynomial over `𝒪[K]`
+they define is `Polynomial.IsEisensteinAt 𝓂[K]`. -/
+theorem mem_eisensteinSet_iff (n : ℕ) (hn : 0 < n) (a : Fin n → K) :
+    a ∈ eisensteinSet K n ↔
+      ∃ f : Polynomial ↥𝒪[K], f.map (algebraMap ↥𝒪[K] K) = toPoly K a ∧ f.IsEisensteinAt 𝓂[K] :=
+  sorry
+
 /-- The integer box of the coefficient space: the set on which the measure is normalized. It is
 compact with nonempty interior, so `Measure.addHaarMeasure` on it is the paper's measure; the
 statements below take the normalization as a hypothesis instead, which keeps them free of a
@@ -338,7 +387,7 @@ theorem measure_eisensteinSet (n : ℕ) (hn : 0 < n)
     [MeasurableSpace (Fin n → K)] [BorelSpace (Fin n → K)]
     (μ : MeasureTheory.Measure (Fin n → K)) [μ.IsAddHaarMeasure] (hμ : μ (integerBox K n) = 1) :
     μ (eisensteinSet K n) =
-      (residueCard K : ℝ≥0∞)⁻¹ ^ n * (1 - (residueCard K : ℝ≥0∞)⁻¹) :=
+      1 / (Nat.card 𝓀[K] : ℝ≥0∞) ^ n * (1 - 1 / (Nat.card 𝓀[K] : ℝ≥0∞)) :=
   sorry
 
 variable {K}
@@ -389,15 +438,15 @@ theorem lintegral_rootCount (n : ℕ) (hn : 0 < n)
     (μ : MeasureTheory.Measure (Fin n → K)) [μ.IsAddHaarMeasure] (hμ : μ (integerBox K n) = 1)
     (L : IntermediateField K (SeparableClosure K)) (hL : L ∈ totallyRamifiedOfDegree K n) :
     ∫⁻ a in eisensteinSet K n, (rootCount L a : ℝ≥0∞) ∂μ =
-      (residueCard K : ℝ≥0∞)⁻¹ ^ (intermediateFieldDiscriminantExponent L + 1) *
-        (1 - (residueCard K : ℝ≥0∞)⁻¹) :=
+      1 / (Nat.card 𝓀[K] : ℝ≥0∞) ^ (intermediateFieldDiscriminantExponent L + 1) *
+        (1 - 1 / (Nat.card 𝓀[K] : ℝ≥0∞)) :=
   sorry
 
 /-! ## Layer 4: the mass formulas -/
 
 /-- **Theorem 1, the first mass formula** ([Serre 1978, Thm. 1]). -/
-theorem tsum_one_div_residueCard_pow_wildExponent (n : ℕ) (hn : 0 < n) :
-    ∑' L : totallyRamifiedOfDegree K n, 1 / (residueCard K : ℝ≥0∞) ^ wildExponent L.1 = n :=
+theorem tsum_one_div_natCard_residueField_pow_wildExponent (n : ℕ) (hn : 0 < n) :
+    ∑' L : totallyRamifiedOfDegree K n, 1 / (Nat.card 𝓀[K] : ℝ≥0∞) ^ wildExponent L.1 = n :=
   sorry
 
 /-- **The finiteness dichotomy** ([Serre 1978, Rmk. 1°]): infinite exactly in equal characteristic
@@ -409,8 +458,8 @@ theorem totallyRamifiedOfDegree_infinite_iff (n : ℕ) (hn : 0 < n) :
 /-- **Convergence** ([Serre 1978, Rmk. 1°]): the real-valued restatement, a corollary of Theorem 1
 through `ENNReal.summable_toReal`, since the `ℝ≥0∞` sum equals the finite value `n`; it carries
 information only in the infinite case. -/
-theorem summable_one_div_residueCard_pow_wildExponent (n : ℕ) (hn : 0 < n) :
-    Summable fun L : totallyRamifiedOfDegree K n => 1 / (residueCard K : ℝ) ^ wildExponent L.1 :=
+theorem summable_one_div_natCard_residueField_pow_wildExponent (n : ℕ) (hn : 0 < n) :
+    Summable fun L : totallyRamifiedOfDegree K n => 1 / (Nat.card 𝓀[K] : ℝ) ^ wildExponent L.1 :=
   sorry
 
 /-- **The orbit count** ([Serre 1978, Rmk. 3°]): the isomorphism class of `L` inside
@@ -423,10 +472,11 @@ theorem ncard_isomorphic_mul_natCard_algEquiv (n : ℕ) (hn : 0 < n)
 
 /-- **Theorem 2, the mass formula proper** ([Serre 1978, Thm. 2]): Theorem 1 regrouped along
 isomorphism classes, over any set of representatives. -/
-theorem tsum_one_div_natCard_algEquiv_mul_residueCard_pow_wildExponent (n : ℕ) (hn : 0 < n)
-    (R : Set (IntermediateField K (SeparableClosure K))) (hR : IsRepresentativeSet n R) :
+theorem tsum_one_div_natCard_algEquiv_mul_natCard_residueField_pow_wildExponent (n : ℕ)
+    (hn : 0 < n) (R : Set (IntermediateField K (SeparableClosure K)))
+    (hR : IsRepresentativeSet n R) :
     ∑' M : R, 1 / ((Nat.card (↥M.1 ≃ₐ[K] ↥M.1) : ℝ≥0∞) *
-      (residueCard K : ℝ≥0∞) ^ wildExponent M.1) = 1 :=
+      (Nat.card 𝓀[K] : ℝ≥0∞) ^ wildExponent M.1) = 1 :=
   sorry
 
 /-- **The tame count**, the corollary that makes the formula concrete: away from the residue

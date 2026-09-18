@@ -17,15 +17,17 @@ behind mass heuristics for global field counting, and nothing like it is upstrea
 
 The machinery the count needs is not ramification theory, and that is what makes this a separate
 roadmap: a **quantitative Newton estimate** over a complete discrete valuation ring (Mathlib's
-`HenselianLocalRing` lifts a simple root but gives no distance bound, hence no count), the
-**lattice-index scaling law** for Haar measure over such a ring (Mathlib's
-`Measure.addHaar_image_linearMap` is real-vector-space only), and the parametrization of `σ_K(n)`
-by the **Eisenstein region** of coefficient space. The first two are stated over an arbitrary
-complete discrete valuation ring and are reusable well outside this roadmap.
+`hensels_lemma` is that estimate over `ℤ_[p]` only, and `HenselianLocalRing` lifts a simple root
+with no distance bound, hence no count), the **lattice-index scaling law** for Haar measure over
+such a ring (Mathlib's `Measure.addHaar_image_linearMap` is real-vector-space only), and the
+parametrization of `σ_K(n)` by the **Eisenstein region** of coefficient space. The first two are
+stated over an arbitrary discrete valuation ring (complete, for the Newton estimate; with finite
+residue field, for the index) and are reusable well outside this roadmap.
 
 Suggested home: `TauCeti/NumberTheory/LocalField/MassFormula/`, with the two general layers
 placed by subject instead: quantitative Newton lifting in
-`TauCeti/RingTheory/DiscreteValuationRing/`, and the lattice scaling law in
+`TauCeti/RingTheory/DiscreteValuationRing/`, the lattice index in
+`TauCeti/LinearAlgebra/FreeModule/` beside Mathlib's `ℤ` analogue, and the Haar scaling law in
 `TauCeti/MeasureTheory/Group/`.
 
 ## Scope
@@ -54,8 +56,10 @@ implementor who picks a different model will not be able to state the summit.
   Spell the hypotheses out; do not bundle them. Mathlib's instances then supply
   `IsDiscreteValuationRing 𝒪[K]`, `Finite 𝓀[K]`, `CompactSpace 𝒪[K]`, `CompleteSpace K` and
   `IsAdicComplete 𝓂[K] 𝒪[K]` by `inferInstance`; consume them, never re-prove them.
-- **The residue cardinality is `q K := Nat.card 𝓀[K]`**, and the residue characteristic is written
-  inline as `ringChar 𝓀[K]`. Do not introduce a `p` abbreviation.
+- **The residue cardinality is written inline as `Nat.card 𝓀[K]`**, and the residue
+  characteristic as `ringChar 𝓀[K]`; `q` below abbreviates the former in prose only, as `σ_K n`
+  and `c L` abbreviate `totallyRamifiedOfDegree K n` and `wildExponent L`. Do not introduce a `q`
+  or `p` abbreviation. A weight `q^{−k}` is spelled `1 / (Nat.card 𝓀[K] : ℝ≥0∞) ^ k`.
 - **Extensions live inside a separable closure.** An extension is a term of
   `IntermediateField K (SeparableClosure K)`. This is Serre's setting and it is load-bearing: in
   equal characteristic `p` the inseparable Eisenstein polynomials (`X^p − π`) must not be counted,
@@ -170,28 +174,35 @@ theory of their own.
   `exists_irreducible`, `Irreducible.maximalIdeal_eq`).
 - **Eisenstein polynomials:** `Mathlib/RingTheory/Polynomial/Eisenstein/*`
   (`Polynomial.IsEisensteinAt`, `IsEisensteinAt.irreducible`).
-- **Hensel's lemma, qualitatively:** `Mathlib/RingTheory/Henselian.lean` — `HenselianLocalRing`,
-  `HenselianRing`. This lifts a simple root *modulo the maximal ideal*; it gives no distance
-  estimate and no count, which is why Layer 1 exists.
+- **Hensel's lemma:** `Mathlib/NumberTheory/Padics/Hensel.lean` — `hensels_lemma`, over `ℤ_[p]`
+  only: for `a` with `‖F(a)‖ < ‖F'(a)‖²` it gives a root `z` with `‖z − a‖ < ‖F'(a)‖` and
+  `‖F'(z)‖ = ‖F'(a)‖`, unique among the roots in that ball. Layer 1 is this theorem over an
+  arbitrary complete discrete valuation ring, in `addVal` spelling.
+  `Mathlib/RingTheory/Henselian.lean` — `HenselianLocalRing`, `HenselianRing` — lifts a simple
+  root *modulo the maximal ideal*, with no distance estimate.
 - **Separable degree and embeddings:** `Mathlib/FieldTheory/SeparableDegree.lean` —
   `Field.embEquivOfAdjoinSplits`, `Field.finSepDegree_eq_finrank_of_isSeparable`.
 - **Smith normal form:** `Mathlib/LinearAlgebra/FreeModule/IdealQuotient.lean` and
-  `…/Finite/Quotient.lean` — `Submodule.quotientEquivPiSpan`, the input to the lattice index.
+  `…/Finite/Quotient.lean` — `Submodule.quotientEquivPiSpan`, the input to the lattice index,
+  whose `ℤ` analogue is `AddSubgroup.index_eq_natAbs_det` (`…/Finite/CardQuotient.lean`).
 - **Haar measure:** `Mathlib/MeasureTheory/Group/Measure.lean` — `IsAddHaarMeasure` and the
-  existence of Haar measure on a locally compact group. ⚠ The determinant scaling law
-  `Measure.addHaar_image_linearMap` (`Mathlib/MeasureTheory/Measure/Lebesgue/EqHaar.lean`) is
-  stated for **real** vector spaces only; the non-archimedean analogue is Layer 2.
+  existence of Haar measure on a locally compact group;
+  `Mathlib/MeasureTheory/Measure/Haar/Unique.lean` — `isAddLeftInvariant_eq_smul_of_regular`, the
+  uniqueness the general-set scaling law uses.
+  ⚠ The determinant scaling law `Measure.addHaar_image_linearMap`
+  (`Mathlib/MeasureTheory/Measure/Lebesgue/EqHaar.lean`) is stated for **real** vector spaces
+  only; the non-archimedean analogue is Layer 2.
 
 ## What is missing (build here)
 
 The set `σ_K(n)` and the wild exponent as a counting weight, with its invariance under
-`K`-isomorphism derived from the consumed exponent invariance; the box and cube descriptions
-that follow from the consumed power-basis orthogonality; quantitative Newton lifting over a
-complete discrete valuation ring and the local constancy of root counts it yields; the
-lattice-index formula and the Haar scaling law over such a ring with finite residue field; the
-measure of the Eisenstein region and the parametrization it carries; and the two mass formulas
-with their finiteness, convergence and orbit-counting companions. None of this is upstream, and
-none of it is claimed by the roadmap this one consumes.
+`K`-isomorphism derived from the consumed exponent invariance; the box and cube descriptions that
+follow from the consumed power-basis orthogonality; quantitative Newton lifting over a complete
+discrete valuation ring and the local constancy of root counts it yields; the lattice-index
+formula over a discrete valuation ring with finite residue field and the Haar scaling law over
+`K`; the measure of the Eisenstein region and the parametrization it carries; and the two mass
+formulas with their finiteness, convergence and orbit-counting companions. None of this is
+upstream, and none of it is claimed by the roadmap this one consumes.
 
 ---
 
@@ -233,8 +244,11 @@ The ordering is the dependency order. As each layer makes the next layer's *type
   the terms of `∑_{i<n} c_i ξ^i` have pairwise distinct valuations — the `i`-th is
   `n · addVal(c_i) + i`, distinct modulo `n` — so no cancellation is possible and the valuation
   of the sum is the minimum of the terms'. The targets here are its family-level consequences: a
-  ball of the ring of integers is a box in power-basis coordinates, and at a radius divisible by
-  `n` it is a cube. These are the workhorse of Layers 2 and 3.
+  ball of the ring of integers is a box in power-basis coordinates — the ball `v_L ≥ r` is
+  `∏_{i<n} π^{⌈(r − i)/n⌉} · 𝒪[K]`, that is `c_i ∈ 𝓂[K] ^ ((r − i) ⌈/⌉ n)` for every `i`, with
+  the `ℕ`-truncated ceiling division `(r − i) ⌈/⌉ n = (r − i + n − 1) / n`, so the `i`-th factor
+  is `𝒪[K]` itself when `r ≤ i` — and at a radius `r = n · ρ` it is the cube with every factor
+  `π^ρ · 𝒪[K]`. These are the workhorse of Layers 2 and 3.
 
 ### Layer 1: quantitative Newton lifting over a complete discrete valuation ring
 
@@ -245,9 +259,13 @@ constancy of the root count is stated over `K` and quantifies over Layer 0's `σ
 - **Newton iteration with an estimate.** If `addVal (F y₀) > 2 · addVal (F' y₀)`, the iteration
   `y ↦ y − F y / F' y` converges to a root `z` of `F` with
   `addVal (z − y₀) ≥ addVal (F y₀) − addVal (F' y₀)`, and `z` is the unique root in that ball.
-  ⚠ This strictly refines Mathlib's `HenselianLocalRing`, which lifts a simple root modulo the
-  maximal ideal and yields no distance bound; the estimate, not the existence, is what Layer 3
-  consumes.
+  Uniqueness is the algebraic statement that two roots `z ≠ z'` of `F` satisfy
+  `addVal (z − z') ≤ addVal (F' z)`, from the Taylor expansion of `F` at `z`; it uses no
+  completeness, and it is the form the local fibre count of Layer 3 applies. ⚠ This is Mathlib's
+  `hensels_lemma` (`Mathlib/NumberTheory/Padics/Hensel.lean`), stated there over `ℤ_[p]` only and
+  in norm spelling, over an arbitrary complete discrete valuation ring in `addVal` spelling;
+  `HenselianLocalRing` lifts a simple root modulo the maximal ideal and yields no distance bound.
+  The estimate, not the existence, is what Layer 3 consumes.
 - **Local constancy of the root count.** For a monic `f` over `𝒪[K]`, separable over `K`, there is
   a threshold `T`, depending on `f` and `n` only, such that every monic `g` with
   `g.coeff i − f.coeff i ∈ 𝓂[K]^T` for all `i` has exactly as many roots in `L` as `f` does, for
@@ -261,19 +279,22 @@ constancy of the root count is stated over `K` and quantifies over Layer 0's `σ
 
 ### Layer 2: lattices, index, and the Haar scaling law
 
-Stated for a complete discrete valuation ring with finite residue field of cardinality `q`, for
-the same reason.
+The index is stated for an arbitrary discrete valuation ring with finite residue field of
+cardinality `q`, for the same reason; it uses no completeness. The scaling law is over `K`, whose
+`𝒪[K]` is such a ring.
 
 - **The index of an image lattice.** For a matrix `M` over `𝒪[K]` with `Associated M.det (π^k)`,
   the quotient of the integer box `Fin n → 𝒪[K]` by its image under `M` has exactly `q^k`
   elements. Via `Submodule.quotientEquivPiSpan` (Smith normal form over the principal ideal ring
   `𝒪[K]`), the quotient splits into residue rings of the diagonal coefficients, whose product is
-  associated to `M.det`.
-- **The scaling law.** For the Haar measure of `Fin n → K` normalized on the integer box,
-  `μ (M · S) = q^{−k} · μ S` for `S` the box or any ball — the non-archimedean analogue of
-  `Measure.addHaar_image_linearMap`. ⚠ Prove it through lattice indices, not through uniqueness
-  of Haar measure: the index route needs no second-countability or regularity side conditions, and
-  the general-set form is not needed.
+  associated to `M.det`. Mathlib's `AddSubgroup.index_eq_natAbs_det` is the `ℤ` analogue.
+- **The scaling law.** For the Haar measure `μ` of `Fin n → K` normalized on the integer box,
+  `μ (M '' S) = q^{−k} · μ S` for every measurable `S` — the non-archimedean analogue of
+  `Measure.addHaar_image_linearMap`. State it in two forms. For `S` the box or any ball it is the
+  index, with no side condition, and that is the form Layer 3 consumes. For general `S`,
+  `μ (M '' ·)` is again a Haar measure, so the constant is read off the box by uniqueness of Haar
+  measure (`isAddLeftInvariant_eq_smul_of_regular`), at the price of the hypothesis `μ.Regular`,
+  which Mathlib's `addHaarMeasure` carries by instance and which no Layer 3 statement needs.
 - **Boxes and balls.** The image lattice of a diagonal matrix is the coordinate box with `i`-th
   factor `π^{e i} · 𝒪[K]`, of volume `q^{−∑ e i}`; a ball is a translate of the lattice of a
   constant-radius box. With Layer 0's orthogonality this computes the volume of a ball of the ring
@@ -282,7 +303,9 @@ the same reason.
 ### Layer 3: the Eisenstein region and the parametrization
 
 - **The Eisenstein region** `E_n ⊆ (Fin n → K)`: every coefficient in `𝓂[K]`, with the constant
-  term of valuation exactly that of a uniformizer. Its measure is `q^{−n} · (1 − q^{−1})`.
+  term of valuation exactly that of a uniformizer. State the bridge the parametrization runs on:
+  `a ∈ E_n` exactly when the coefficients are integral and the polynomial over `𝒪[K]` they
+  define is `Polynomial.IsEisensteinAt 𝓂[K]`. Its measure is `q^{−n} · (1 − q^{−1})`.
 - **Almost every Eisenstein polynomial is separable** ([Serre 1978, eq. (3)]): the non-separable
   locus is null. In equal characteristic this is where the inseparable polynomials are discarded,
   and it is the reason the count is over subextensions of `SeparableClosure K`.
@@ -326,16 +349,19 @@ the same reason.
 
 ### Layer 4: the mass formulas
 
-- **Theorem 1** ([Serre 1978, Thm. 1]): for `0 < n`, `∑' L : σ_K n, 1 / (q K) ^ c L = n` in
+- **Theorem 1** ([Serre 1978, Thm. 1]): for `0 < n`, `∑' L : σ_K n, 1 / q ^ c L = n` in
   `ℝ≥0∞`. Integrate the root-count identity of Layer 3 over `E_n`, interchange the sum and
   integral using `MeasureTheory.lintegral_tsum` with Layer 3's countability and
   almost-everywhere measurability targets, and divide by the measure of the region.
 - **The finiteness dichotomy** ([Serre 1978, Rmk. 1°]): `σ_K n` is infinite if and only if `K` has
   equal characteristic `p` and `p ∣ n`. Both directions are targets. The forward direction follows
-  from Theorem 1 together with the uniform bound `c L ≤ n · addVal(n)` outside the asserted case;
+  from Theorem 1 together with the uniform bound `c L ≤ n · natCastValuation K n h`, for
+  `h : (n : K) ≠ 0`, which is available exactly outside the asserted case — the consumed upper
+  bound of `differentExponent_bounds_of_wild` at `e = n`, its `natCastValuation L n` being
+  `n · natCastValuation K n h` since `L / K` is totally ramified;
   the converse is an explicit family — the Eisenstein polynomials `X^n + π^m X + π` for `m ≥ 1`
   have `d = n · m`, pairwise distinct, hence generate infinitely many distinct members.
-- **Convergence** ([Serre 1978, Rmk. 1°]): `Summable fun L : σ_K n => 1 / (q K : ℝ) ^ c L`, the
+- **Convergence** ([Serre 1978, Rmk. 1°]): `Summable fun L : σ_K n => 1 / (q : ℝ) ^ c L`, the
   real-valued restatement, a corollary of Theorem 1 through `ENNReal.summable_toReal`; it carries
   information only in the infinite case.
 - **The orbit count** ([Serre 1978, Rmk. 3°]): for `L ∈ σ_K n`, the number of `M ∈ σ_K n` that are
@@ -343,7 +369,7 @@ the same reason.
   exactly `n` embeddings into `SeparableClosure K`; each image lies in `σ_K n` by Layer 0; and the
   embeddings with a given image form a torsor under `Aut_K(L)`.
 - **Theorem 2** ([Serre 1978, Thm. 2]): for every `R` with `IsRepresentativeSet n R`,
-  `∑' M : R, 1 / (#Aut_K(M) · (q K) ^ c M) = 1` in `ℝ≥0∞`. Theorem 1 regrouped along isomorphism
+  `∑' M : R, 1 / (#Aut_K(M) · q ^ c M) = 1` in `ℝ≥0∞`. Theorem 1 regrouped along isomorphism
   classes, using the invariance of `c` from Layer 0 and the orbit count.
 - **The tame count**, as a corollary worth stating: when `¬ (ringChar 𝓀[K] ∣ n)`, every `c L = 0`,
   so `σ_K n` is finite with exactly `n` elements.
@@ -375,10 +401,9 @@ measure, and an off-by-one in `c`.
 ## Ordering
 
 Layer 0 comes first and rests on the consumed contract. The Newton estimate of Layer 1 and all of
-Layer 2 are independent of Layer 0 and of each other — general statements about complete discrete
-valuation rings — so they can be built before any of the consumed material lands; the local
-constancy of the root count quantifies over `σ_K n` and needs Layer 0. Layer 3 needs 0–2; Layer 4
-needs Layer 3, except for the orbit count, which needs only Layer 0 and can be built early.
+Layer 2 are independent of Layer 0 and of each other — general statements about discrete
+valuation rings; the local constancy of the root count quantifies over `σ_K n` and needs Layer 0.
+Layer 3 needs 0–2; Layer 4 needs Layer 3, except for the orbit count, which needs only Layer 0.
 
 ## Long horizon (a roadmap for a future roadmap; do not attempt it here)
 
@@ -437,9 +462,9 @@ Where this roadmap departs from the source:
   Mathlib's spelling, and the consumed roadmap's, so the lemmas land where the rest of the
   integral-closure API lives.
 - Layer 1's Newton estimate and Layer 2 are stated in the source only for the local-field case
-  they were needed in; this roadmap asks for them over an arbitrary complete discrete valuation
-  ring (with finite residue field, for Layer 2), which is the generality their proofs already
-  have.
+  they were needed in; this roadmap asks for them over an arbitrary discrete valuation ring
+  (complete, for the Newton estimate; with finite residue field, for the index), which is the
+  generality their proofs already have.
 - The source is organized as a frozen specification file paired with a development file that
   discharges it. That device does not transfer: in Tau Ceti the roadmap is what commits to a
   statement before its proof exists, and no `sorry` may land in `TauCeti/`.
