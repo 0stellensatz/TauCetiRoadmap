@@ -45,10 +45,11 @@ they take junk values. That is why every milestone carries `0 < n` and membershi
 `totallyRamifiedOfDegree K n`. Do not repair the junk by adding finiteness hypotheses to the
 definitions.
 
-Two layers are stated over an arbitrary complete discrete valuation ring rather than over a local
-field, because that is the generality their proofs have: `exists_isRoot` and `card_aroots_eq`
-(Layer 1, `TauCeti/RingTheory/DiscreteValuationRing/`) and `card_quotient_range` (Layer 2,
-`TauCeti/MeasureTheory/Group/`). Everything else belongs in
+Two statements are made over an arbitrary complete discrete valuation ring rather than over a
+local field, because that is the generality their proofs have: `exists_isRoot` (Layer 1,
+`TauCeti/RingTheory/DiscreteValuationRing/`) and `card_quotient_range` (Layer 2,
+`TauCeti/MeasureTheory/Group/`). Everything else, including Layer 1's `card_aroots_eq`, which
+quantifies over Layer 0's `totallyRamifiedOfDegree K n`, belongs in
 `TauCeti/NumberTheory/LocalField/MassFormula/`.
 -/
 
@@ -183,10 +184,14 @@ def IsRepresentativeSet (n : ℕ) (R : Set (IntermediateField K (SeparableClosur
   R ⊆ totallyRamifiedOfDegree K n ∧
     ∀ L ∈ totallyRamifiedOfDegree K n, ∃! M, M ∈ R ∧ Nonempty (↥L ≃ₐ[K] ↥M)
 
-/- Eisenstein monogenicity ([Serre 1979, Chap. I, §6, Prop. 17]) and the statement that an
-Eisenstein root generates a totally ramified extension are the consumed
-`exists_integerRing_adjoin_eq_top` and `isTotallyRamified_iff_exists_eisenstein_generator`, and
-are deliberately not restated here. -/
+/- Eisenstein monogenicity ([Serre 1979, Chap. I, §6, Prop. 17]) — an Eisenstein polynomial
+generates a totally ramified extension in which its root is a uniformizer and generates the ring
+of integers — is consumed as the local fields and ramification roadmap's README item *Layer 3:
+totally ramified is equivalent to Eisenstein*, which has no declaration in that roadmap's
+`Suggested.lean`; it is deliberately not restated here. Neither `exists_integerRing_adjoin_eq_top`
+(which produces some generator, not the Eisenstein root) nor the `←` direction of
+`isTotallyRamified_iff_exists_eisenstein_generator` (which takes `Algebra.adjoin 𝒪[K] {ξ} = ⊤` as
+an input) states it. -/
 
 /-- The **bridge**, and the target that turns a statement about `totallyRamifiedOfDegree K n` into
 a computation: the consumed equivalence `isTotallyRamified_iff_exists_eisenstein_generator`,
@@ -199,23 +204,40 @@ theorem exists_eisenstein_generator (n : ℕ) (hn : 0 < n)
       IntermediateField.adjoin K {x} = L ∧ (minpoly 𝒪[K] x).natDegree = n :=
   sorry
 
+/-- The converse of `exists_eisenstein_generator`, and the direction every later layer applies
+(`tsum_rootCount`, the orbit count, and the Layer 0 lemma that a `K`-embedding preserves
+membership): a root in `SeparableClosure K` of a degree-`n` Eisenstein polynomial over `𝒪[K]`
+generates a member of `totallyRamifiedOfDegree K n`. This transports the consumed statement that
+an Eisenstein polynomial generates a totally ramified extension in which its root is a
+uniformizer ([Serre 1979, Chap. I, §6, Prop. 17]; see the comment above). -/
+theorem adjoin_mem_totallyRamifiedOfDegree (n : ℕ) (hn : 0 < n) {f : Polynomial ↥𝒪[K]}
+    (hf : f.IsEisensteinAt 𝓂[K]) (hfn : f.natDegree = n) {x : SeparableClosure K}
+    (hx : Polynomial.aeval x f = 0) :
+    IntermediateField.adjoin K {x} ∈ totallyRamifiedOfDegree K n :=
+  sorry
+
 variable (K)
 
 /-- `c L` is a nonnegative integer ([Serre 1978, p.1031, footnote 1]): in the `ℕ`-model, the bound
 `n − 1 ≤ d L`, which is what makes the truncated subtraction defining `wildExponent` faithful.
-This is a **corollary of the consumed contract** — the tame equality
-`differentExponent_eq_ramificationIndex_sub_one_iff` together with the wild lower bound of
-`differentExponent_bounds_of_wild` — restated here in the form the count applies, not a fresh
-development. -/
+This is a **corollary of Mathlib and the consumed contract** — `pow_sub_one_dvd_differentIdeal`
+(`Mathlib/RingTheory/DedekindDomain/Different.lean`) gives `𝓂[L] ^ (e − 1) ∣ differentIdeal`
+for every finite separable extension, hence `e − 1 ≤ differentExponent` by its definition, and
+`discriminantExponent_eq_inertiaDegree_mul_differentExponent` with `e = n`, `f = 1` turns that
+into `n − 1 ≤ d L` — restated here in the form the count applies, not a fresh development. The
+consumed `differentExponent_bounds_of_wild` does not supply it: its hypothesis
+`(ramificationIndex K L : L) ≠ 0` fails in equal characteristic `p` with `p ∣ n`. -/
 theorem sub_one_le_intermediateFieldDiscriminantExponent (n : ℕ) (hn : 0 < n)
     (L : IntermediateField K (SeparableClosure K)) (hL : L ∈ totallyRamifiedOfDegree K n) :
     n - 1 ≤ intermediateFieldDiscriminantExponent L :=
   sorry
 
 /-- **The tame criterion, as the count uses it** ([Serre 1978, p.1031]): `c L = 0` exactly when `n`
-is prime to the residue characteristic. Again a corollary of the consumed
-`differentExponent_eq_ramificationIndex_sub_one_iff`, rephrased in terms of `c`; the
-ramification-theoretic content belongs to that roadmap. -/
+is prime to the residue characteristic. A corollary of the consumed
+`differentExponent_eq_ramificationIndex_sub_one_iff` (with `e = n`) together with
+`sub_one_le_intermediateFieldDiscriminantExponent`, which the `→` direction needs to pass from
+`d L + 1 − n = 0` to `d L = n − 1`; rephrased in terms of `c`, the ramification-theoretic content
+belongs to that roadmap. -/
 theorem wildExponent_eq_zero_iff (n : ℕ) (hn : 0 < n)
     (L : IntermediateField K (SeparableClosure K)) (hL : L ∈ totallyRamifiedOfDegree K n) :
     wildExponent L = 0 ↔ ¬ ringChar 𝓀[K] ∣ n :=
@@ -240,9 +262,11 @@ here. -/
 
 /-! ## Layer 1: quantitative Newton lifting over a complete discrete valuation ring
 
-Stated for an arbitrary complete discrete valuation ring; the local-field case is an instance.
-This strictly refines Mathlib's `HenselianLocalRing`, which lifts a simple root modulo the maximal
-ideal and gives no distance bound. -/
+The Newton estimate `exists_isRoot` is stated for an arbitrary complete discrete valuation ring;
+the local-field case is an instance. It strictly refines Mathlib's `HenselianLocalRing`, which
+lifts a simple root modulo the maximal ideal and gives no distance bound. The root-count statement
+`card_aroots_eq` is over the local field `K` and quantifies over Layer 0's
+`totallyRamifiedOfDegree K n`. -/
 
 /-- **Newton iteration with an estimate.** If the order of `F` at `y₀` exceeds twice that of its
 derivative, the iteration converges to a root `z` whose distance to `y₀` has order at least the
@@ -259,12 +283,12 @@ theorem exists_isRoot {A : Type*} [CommRing A] [IsDomain A] [IsDiscreteValuation
   sorry
 
 /-- **Local constancy of the root count**, the form Layer 3 consumes: for a monic `f` over `𝒪[K]`,
-separable over `K`, coefficientwise closeness forces equality of root counts in every member of
-`totallyRamifiedOfDegree K n`. -/
-theorem card_aroots_eq (n : ℕ) (hn : 0 < n) (L : IntermediateField K (SeparableClosure K))
-    (hL : L ∈ totallyRamifiedOfDegree K n) {f : Polynomial ↥𝒪[K]} (hfm : f.Monic)
+separable over `K`, one threshold `T`, depending on `f` and `n` only, makes coefficientwise
+closeness force equality of root counts in every member of `totallyRamifiedOfDegree K n` at
+once. -/
+theorem card_aroots_eq (n : ℕ) (hn : 0 < n) {f : Polynomial ↥𝒪[K]} (hfm : f.Monic)
     (hfsep : (f.map (algebraMap ↥𝒪[K] K)).Separable) :
-    ∃ T : ℕ, 0 < T ∧ ∀ g : Polynomial ↥𝒪[K], g.Monic →
+    ∃ T : ℕ, 0 < T ∧ ∀ L ∈ totallyRamifiedOfDegree K n, ∀ g : Polynomial ↥𝒪[K], g.Monic →
       (∀ i, g.coeff i - f.coeff i ∈ 𝓂[K] ^ T) →
       ((g.map (algebraMap ↥𝒪[K] K)).aroots ↥L).card =
         ((f.map (algebraMap ↥𝒪[K] K)).aroots ↥L).card :=
@@ -382,8 +406,9 @@ theorem totallyRamifiedOfDegree_infinite_iff (n : ℕ) (hn : 0 < n) :
     (totallyRamifiedOfDegree K n).Infinite ↔ ringChar K = ringChar 𝓀[K] ∧ ringChar 𝓀[K] ∣ n :=
   sorry
 
-/-- **Convergence** ([Serre 1978, Rmk. 1°]): the real-valued restatement, meaningful precisely in
-the infinite case, where the `ℝ≥0∞` sum asserts nothing about summability. -/
+/-- **Convergence** ([Serre 1978, Rmk. 1°]): the real-valued restatement, a corollary of Theorem 1
+through `ENNReal.summable_toReal`, since the `ℝ≥0∞` sum equals the finite value `n`; it carries
+information only in the infinite case. -/
 theorem summable_one_div_residueCard_pow_wildExponent (n : ℕ) (hn : 0 < n) :
     Summable fun L : totallyRamifiedOfDegree K n => 1 / (residueCard K : ℝ) ^ wildExponent L.1 :=
   sorry
