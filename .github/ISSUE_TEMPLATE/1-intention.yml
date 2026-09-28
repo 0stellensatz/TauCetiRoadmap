@@ -54,6 +54,7 @@ body:
         - OptimalTransport
         - OrthogonalSpinGroups
         - PDE
+        - PeripheralActions
         - PolynomialGaloisGroups
         - ProfiniteArithmetic
         - ProfiniteCohomology

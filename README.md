@@ -49,6 +49,7 @@ If you want to write or review a roadmap, start with [CONTRIBUTING.md](CONTRIBUT
 - [Optimal transport and Wasserstein geometry](TauCetiRoadmap/OptimalTransport/README.md)
 - [Orthogonal and spin groups](TauCetiRoadmap/OrthogonalSpinGroups/README.md)
 - [Partial differential equations](TauCetiRoadmap/PDE/README.md)
+- [Peripheral actions on free pro-`p` groups](TauCetiRoadmap/PeripheralActions/README.md)
 - [Profinite and pro-`p` groups](TauCetiRoadmap/ProfiniteProPGroups/README.md)
 - [Profinite integers, profinite powers, and continuous automorphisms](TauCetiRoadmap/ProfiniteArithmetic/README.md)
 - [Quadratic forms and cohomological invariants](TauCetiRoadmap/QuadraticFormInvariants/README.md)
