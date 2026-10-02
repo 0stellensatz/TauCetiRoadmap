@@ -328,9 +328,9 @@ cardinality `q`, for the same reason; it uses no completeness. The scaling law i
   of minimal polynomial `f`, and `d = d L` the consumed discriminant exponent through its wrapper —
   which is `addVal (f' ξ)`, since `𝒪_L = 𝒪[K][ξ]` makes Mathlib's `conductor_mul_differentIdeal`
   (with `conductor_eq_top_of_adjoin_eq_top`) read `differentIdeal = (f' ξ)`, and the residue degree
-  is `1` — and for every `ρ` with `d + n ≤ n · ρ`: a monic `g` over `𝒪[K]` has a root in the cube
-  `ξ + π^ρ · 𝒪_L` of radius `π^ρ`, that is `addVal (y − ξ) ≥ n · ρ`, if and only if
-  `addVal (g ξ) ≥ n · ρ + d`, and then exactly one. Existence is Layer 1 at `ξ`, where
+  is `1` — and for every `ρ` with `d + n ≤ n · ρ`: a monic `g` of degree `n` over `𝒪[K]` has a
+  root in the cube `ξ + π^ρ · 𝒪_L` of radius `π^ρ`, that is `addVal (y − ξ) ≥ n · ρ`, if and only
+  if `addVal (g ξ) ≥ n · ρ + d`, and then exactly one. Existence is Layer 1 at `ξ`, where
   `addVal (g' ξ) = d`, so the root lands at distance `≥ n · ρ`; uniqueness is that the threshold
   transports the derivative order to any root `z` of `g` in the cube, `addVal (g' z) = d`, and two
   distinct roots `z ≠ z'` would then give `d = addVal (g' z) ≥ addVal (z − z') ≥ n · ρ`; the
