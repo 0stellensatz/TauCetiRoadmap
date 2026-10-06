@@ -29,6 +29,7 @@ body:
         - ConformalMapping
         - DGAInfinity
         - DenseGraphLimits
+        - DifferentialGeometry
         - EllipticCurves
         - Exchangeability
         - FuchsianOrbifolds
